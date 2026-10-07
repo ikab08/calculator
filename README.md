@@ -1,1 +1,1 @@
-# odin-calculator
+In this project i'll create a calculator
