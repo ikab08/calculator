@@ -2,6 +2,15 @@ let numberOne;
 let operator;
 let numberTwo;
 
+let justCalculated = false;
+
+const displayText = document.querySelector("#display");
+
+const btnNumber = document.querySelectorAll(".number");
+const btnOperator = document.querySelectorAll(".operator");
+
+const btnDelete = document.querySelector("#delete");
+
 function add(a, b){
     return a+b ;
 }
@@ -22,23 +31,59 @@ function divide(a, b){
     } 
 }
 
-function operate(operator,number1,number2){
-    let result;
+function operate(operator, number1, number2){
     switch (operator) {
         case "+":
-            result = add(number1,number2);
-            break;
+            return result = add(number1, number2);
         case "-":
-            result = subtract(number1,number2);
-            break;
+            return result = subtract(number1, number2);
         case "*":
-            result = multiply(number1,number2);
-            break;
+            return result = multiply(number1, number2);
         case "/":
-            result = divide(number1,number2);
-            break;
-        default:
-            break;
+            return result = divide(number1, number2);
     }
-    return result;
 }
+
+function updateDisplay(newDisplay, status) {
+    if (status == "normal") {
+        displayText.innerHTML = newDisplay
+    } else {
+        displayText.innerHTML += newDisplay;
+    }
+}
+
+function clicDigit(e) {
+    if(displayText.innerHTML == 0 || justCalculated) {
+        updateDisplay(e.target.id, "normal");
+        numberOne = parseFloat(displayText.innerHTML);
+        justCalculated == false;
+    } else {
+        numberTwo = parseFloat(e.target.id);
+        updateDisplay(numberTwo, "concat");
+    }
+}
+
+btnNumber.forEach(bouton => {
+    bouton.addEventListener("click", clicDigit);
+});
+
+btnOperator.forEach(bouton => {
+    bouton.addEventListener('click', (e)=> {
+        if (justCalculated) numberOne = parseFloat(displayText.innerHTML); justCalculated = false;
+
+        if(e.target.id == "equal") {
+            updateDisplay(operate(operator, numberOne, numberTwo), "normal");
+            justCalculated = true;
+        } else {
+            operator = e.target.textContent;
+            updateDisplay(" "+operator+" ", "concat");
+        }
+    });
+})
+
+btnDelete.addEventListener("click", ()=> {
+    numberOne = "";
+    numberTwo = "";
+    operator = "";
+    updateDisplay(0, "normal");
+})
