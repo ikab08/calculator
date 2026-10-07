@@ -1,0 +1,40 @@
+* {
+    box-sizing: border-box;
+}
+
+section {
+    width: 360px;
+    height: 360px;
+    margin: 50px auto;
+    border: 2px solid black;
+    display: flex;
+    flex-direction: column;
+}
+
+.display{
+    border: 1px solid gainsboro;
+    height: 60px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 10px;
+}
+
+.number-line{
+    display: flex;
+    justify-content: center;
+}
+
+.number-line div {
+    flex: 0 0 calc(100%/4); 
+    height: 60px; 
+    border: 1px solid grey;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.number-line div:hover {
+    background-color: gray;
+}
