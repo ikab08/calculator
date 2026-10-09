@@ -1,15 +1,14 @@
-let numberOne;
-let operator;
-let numberTwo;
+let firstNumber;
+let secondNumber;
+let operator = "";
 
 let justCalculated = false;
 
-const displayText = document.querySelector("#display");
+const display = document.querySelector("#display");
+let displayText = display.textContent;
 
-const btnNumber = document.querySelectorAll(".number");
-const btnOperator = document.querySelectorAll(".operator");
+const btns = document.querySelectorAll('button');
 
-const btnDelete = document.querySelector("#delete");
 
 function add(a, b){
     return a+b ;
@@ -34,56 +33,96 @@ function divide(a, b){
 function operate(operator, number1, number2){
     switch (operator) {
         case "+":
-            return result = add(number1, number2);
+            return add(number1, number2);
         case "-":
-            return result = subtract(number1, number2);
+            return subtract(number1, number2);
         case "*":
-            return result = multiply(number1, number2);
+            return multiply(number1, number2);
         case "/":
-            return result = divide(number1, number2);
+            return divide(number1, number2);
     }
 }
 
-function updateDisplay(newDisplay, status) {
-    if (status == "normal") {
-        displayText.innerHTML = newDisplay
-    } else {
-        displayText.innerHTML += newDisplay;
-    }
+function reset() {
+    firstNumber = "";
+    secondNumber = "";
+    operator = "";
+    displayText=0;
+    updateDisplay(displayText);
+}
+
+function updateDisplay(newDisplay) {
+    display.textContent = newDisplay;
 }
 
 function clicDigit(e) {
-    if(displayText.innerHTML == 0 || justCalculated) {
-        updateDisplay(e.target.id, "normal");
-        numberOne = parseFloat(displayText.innerHTML);
-        justCalculated == false;
+    let value = e.target.value;
+    if (justCalculated)  {
+        if (displayText == "Undefined") reset(); 
+        else firstNumber = displayText;
+    }
+    if (value == "+" || value == "-" || value == "*" || value == "/") {
+        if (firstNumber) {
+            operator = value;
+            displayText += ` ${operator} `;
+            updateDisplay(displayText);
+        }
+        if (justCalculated) secondNumber ="" ; justCalculated = false;
+    } else if(value == "=") {
+        if (firstNumber && (secondNumber == 0 || secondNumber)) {
+            let n1 = parseFloat(firstNumber); 
+            let n2 = parseFloat(secondNumber);
+            let rz = displayText = operate(operator, n1, n2);
+            updateDisplay(displayText); 
+            justCalculated = true;
+        }
+    } else if(isNaN(value)){
+        switch (value) {
+            case "delete":
+                reset();
+                break;
+            case ".":
+                break;
+            case "back":
+                break;
+        }
     } else {
-        numberTwo = parseFloat(e.target.id);
-        updateDisplay(numberTwo, "concat");
+        if (justCalculated) reset();
+
+        if(displayText == 0 || displayText == "Undefined" || justCalculated) {
+            firstNumber = value;
+            displayText = value;
+            updateDisplay(displayText);
+            justCalculated = false;
+        } else {
+            if(!operator) {
+                displayText += value;
+                firstNumber = displayText;
+                updateDisplay(displayText);
+            } else {
+                if (!secondNumber || secondNumber == "") { 
+                    secondNumber = value; 
+                    displayText += value; 
+                } else { 
+                    if(secondNumber == 0) {
+                        secondNumber = value; 
+                        displayText = displayText.slice(0, -1) + value;
+                    } else {
+                        secondNumber = secondNumber += value;
+                        displayText += value; 
+                    }
+                }
+                // displayText += value; 
+                // secondNumber = (secondNumber || "") + value;
+                updateDisplay(displayText);
+            } 
+            justCalculated = false;
+        }
     }
 }
 
-btnNumber.forEach(bouton => {
-    bouton.addEventListener("click", clicDigit);
-});
-
-btnOperator.forEach(bouton => {
-    bouton.addEventListener('click', (e)=> {
-        if (justCalculated) numberOne = parseFloat(displayText.innerHTML); justCalculated = false;
-
-        if(e.target.id == "equal") {
-            updateDisplay(operate(operator, numberOne, numberTwo), "normal");
-            justCalculated = true;
-        } else {
-            operator = e.target.textContent;
-            updateDisplay(" "+operator+" ", "concat");
-        }
+btns.forEach(bouton => {
+    bouton.addEventListener("click", (event)=> {
+        clicDigit(event);
     });
-})
-
-btnDelete.addEventListener("click", ()=> {
-    numberOne = "";
-    numberTwo = "";
-    operator = "";
-    updateDisplay(0, "normal");
-})
+});
