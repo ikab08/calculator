@@ -55,8 +55,11 @@ function updateDisplay(newDisplay) {
     display.textContent = newDisplay;
 }
 
-function clicDigit(e) {
-    let value = e.target.value;
+function clicDigit(e, mode) {
+    let value;
+    if (mode == "keydown") { value = e.key;} 
+    else { value = e.target.value;}
+    
     if (justCalculated)  {
         if (displayText == "Undefined") reset(); 
         else firstNumber = displayText;
@@ -81,7 +84,7 @@ function clicDigit(e) {
         reset();
     } else if(value == "back"){ 
 
-    } else {
+    } else if (!isNaN(value) || value === ".")  {
         if (justCalculated) reset();
 
         if(displayText == "0" || displayText == "Undefined" || justCalculated) { 
@@ -113,10 +116,8 @@ function clicDigit(e) {
                 } else { 
                     if(secondNumber == "0") { 
                         if (value == ".") {
-                            console.log (`avant dix ${secondNumber} val ${value}`);
                             secondNumber = secondNumber += value;
                             displayText += value; 
-                            console.log (`après dix ${secondNumber} val ${value}`);
                         } else {
                             secondNumber = value; 
                             displayText = displayText.slice(0, -1) + value;
@@ -137,6 +138,17 @@ function clicDigit(e) {
 
 btns.forEach(bouton => {
     bouton.addEventListener("click", (event)=> {
-        clicDigit(event);
+        clicDigit(event, "clic");
     });
+});
+
+document.addEventListener('keydown', function(event) {
+    const value = event.key;
+    if (!isNaN(value) || value === "." || value === "+" 
+    || value === "-" || value === "*" || value === "/" 
+    || value === "=" || value === "Enter" || value === "C" 
+    || value === "Escape") {
+        event.preventDefault(); // Prevent default behavior for keys like Enter and Escape
+        clicDigit(event, "keydown");
+    }
 });
