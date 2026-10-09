@@ -67,11 +67,23 @@ function clicDigit(e, mode) {
     
     if (value == "+" || value == "-" || value == "*" || value == "/") {
         if (firstNumber) {
+            if (operator && secondNumber && !justCalculated) {
+                // avoid more than a pair of numbers
+                let rz = operate(operator, parseFloat(firstNumber), parseFloat(secondNumber));
+                firstNumber = rz;
+                secondNumber = "";
+                displayText = firstNumber;
+            } else if (operator && !secondNumber && !justCalculated) {
+                // not allowed signs
+                displayText = displayText.slice(0, -3); // remove " + "
+            } else if (justCalculated) {
+                secondNumber = "";
+            }
             operator = value;
             displayText += ` ${operator} `;
             updateDisplay(displayText);
+            justCalculated = false;
         }
-        if (justCalculated) secondNumber ="" ; justCalculated = false;
     } else if(value == "=") {
         if (firstNumber && (secondNumber == 0 || secondNumber)) {
             let n1 = parseFloat(firstNumber); 
