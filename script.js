@@ -61,6 +61,7 @@ function clicDigit(e) {
         if (displayText == "Undefined") reset(); 
         else firstNumber = displayText;
     }
+    
     if (value == "+" || value == "-" || value == "*" || value == "/") {
         if (firstNumber) {
             operator = value;
@@ -76,37 +77,50 @@ function clicDigit(e) {
             updateDisplay(displayText); 
             justCalculated = true;
         }
-    } else if(isNaN(value)){
-        switch (value) {
-            case "delete":
-                reset();
-                break;
-            case ".":
-                break;
-            case "back":
-                break;
-        }
+    } else if(value == "delete"){
+        reset();
+    } else if(value == "back"){ 
+
     } else {
         if (justCalculated) reset();
 
-        if(displayText == 0 || displayText == "Undefined" || justCalculated) {
-            firstNumber = value;
-            displayText = value;
+        if(displayText == "0" || displayText == "Undefined" || justCalculated) { 
+            if (value == ".") { 
+                firstNumber += value; 
+                displayText += value; 
+            } else { 
+                firstNumber = value; 
+                displayText = value; 
+            }
             updateDisplay(displayText);
             justCalculated = false;
         } else {
-            if(!operator) {
+            if(!operator) { 
+                if (value == "." && firstNumber && firstNumber.includes(".")) return;
                 displayText += value;
                 firstNumber = displayText;
                 updateDisplay(displayText);
             } else {
+                if (value == "." && secondNumber && secondNumber.includes(".")) return;
                 if (!secondNumber || secondNumber == "") { 
-                    secondNumber = value; 
-                    displayText += value; 
-                } else { 
-                    if(secondNumber == 0) {
+                    if (value == ".") { 
+                        secondNumber = "0"+value; 
+                        displayText += `0${value}`; 
+                    } else {
                         secondNumber = value; 
-                        displayText = displayText.slice(0, -1) + value;
+                        displayText += value; 
+                    }
+                } else { 
+                    if(secondNumber == "0") { 
+                        if (value == ".") {
+                            console.log (`avant dix ${secondNumber} val ${value}`);
+                            secondNumber = secondNumber += value;
+                            displayText += value; 
+                            console.log (`après dix ${secondNumber} val ${value}`);
+                        } else {
+                            secondNumber = value; 
+                            displayText = displayText.slice(0, -1) + value;
+                        }
                     } else {
                         secondNumber = secondNumber += value;
                         displayText += value; 
