@@ -84,7 +84,7 @@ function clicDigit(e, mode) {
             updateDisplay(displayText);
             justCalculated = false;
         }
-    } else if(value == "=") {
+    } else if(value == "=" || value == "Enter") {
         if (firstNumber && (secondNumber == 0 || secondNumber)) {
             let n1 = parseFloat(firstNumber); 
             let n2 = parseFloat(secondNumber);
@@ -92,9 +92,9 @@ function clicDigit(e, mode) {
             updateDisplay(displayText); 
             justCalculated = true;
         }
-    } else if(value == "delete"){
+    } else if(value == "delete" || value == "Escape" || value =="C" || value == "c"){
         reset();
-    } else if(value == "back"){ 
+    } else if(value == "back" || value == "Backspace"){ 
         if (displayText == "Undefined") { reset(); return; }
         if (justCalculated) return; // unable delete result
 
@@ -106,7 +106,7 @@ function clicDigit(e, mode) {
             // on efface l'opérateur et ses espaces (" + ")
             operator = "";
             displayText = displayText.slice(0, -3);
-        } else if (firstNumber) { console.log(firstNumber);
+        } else if (firstNumber) {
             firstNumber = firstNumber.slice(0, -1);
             if (firstNumber === "") { reset(); return; }
             displayText = firstNumber;
@@ -174,8 +174,8 @@ document.addEventListener('keydown', function(event) {
     const value = event.key;
     if (!isNaN(value) || value === "." || value === "+" 
     || value === "-" || value === "*" || value === "/" 
-    || value === "=" || value === "Enter" || value === "C" 
-    || value === "Escape") {
+    || value === "=" || value === "Enter" || value === "C"  || value === "c" 
+    || value === "Escape" || value === "Backspace" ) {
         event.preventDefault(); // Prevent default behavior for keys like Enter and Escape
         clicDigit(event, "keydown");
     }
