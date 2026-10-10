@@ -43,6 +43,12 @@ function operate(operator, number1, number2){
     }
 }
 
+function operateAndRound(op, a, b) {
+    const result = operate(op, a, b);
+    // return parseFloat(result.toPrecision(12));
+    return typeof result === "number" ? parseFloat(result.toPrecision(12)) : result;  // round if is number 
+}
+
 function reset() {
     firstNumber = "";
     secondNumber = "";
@@ -69,7 +75,7 @@ function clicDigit(e, mode) {
         if (firstNumber) {
             if (operator && secondNumber && !justCalculated) {
                 // avoid more than a pair of numbers
-                let rz = operate(operator, parseFloat(firstNumber), parseFloat(secondNumber));
+                let rz = operateAndRound(operator, parseFloat(firstNumber), parseFloat(secondNumber));
                 firstNumber = rz;
                 secondNumber = "";
                 displayText = firstNumber;
@@ -88,7 +94,7 @@ function clicDigit(e, mode) {
         if (firstNumber && (secondNumber == 0 || secondNumber)) {
             let n1 = parseFloat(firstNumber); 
             let n2 = parseFloat(secondNumber);
-            displayText = String(operate(operator, n1, n2));
+            displayText = String(operateAndRound(operator, n1, n2));
             updateDisplay(displayText); 
             justCalculated = true;
         }
