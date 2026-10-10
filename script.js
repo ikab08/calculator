@@ -62,7 +62,7 @@ function clicDigit(e, mode) {
     
     if (justCalculated)  {
         if (displayText == "Undefined") reset(); 
-        else firstNumber = displayText;
+        else firstNumber = String(displayText);
     }
     
     if (value == "+" || value == "-" || value == "*" || value == "/") {
@@ -88,14 +88,30 @@ function clicDigit(e, mode) {
         if (firstNumber && (secondNumber == 0 || secondNumber)) {
             let n1 = parseFloat(firstNumber); 
             let n2 = parseFloat(secondNumber);
-            let rz = displayText = operate(operator, n1, n2);
+            displayText = String(operate(operator, n1, n2));
             updateDisplay(displayText); 
             justCalculated = true;
         }
     } else if(value == "delete"){
         reset();
     } else if(value == "back"){ 
+        if (displayText == "Undefined") { reset(); return; }
+        if (justCalculated) return; // unable delete result
 
+        if (secondNumber) {
+            // del last digit of secondnumber
+            secondNumber = secondNumber.slice(0, -1);
+            displayText = displayText.slice(0, -1);
+        } else if (operator) {
+            // on efface l'opérateur et ses espaces (" + ")
+            operator = "";
+            displayText = displayText.slice(0, -3);
+        } else if (firstNumber) { console.log(firstNumber);
+            firstNumber = firstNumber.slice(0, -1);
+            if (firstNumber === "") { reset(); return; }
+            displayText = firstNumber;
+        }
+        updateDisplay(displayText);
     } else if (!isNaN(value) || value === ".")  {
         if (justCalculated) reset();
 
