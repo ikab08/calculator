@@ -1,14 +1,15 @@
-let firstNumber;
-let secondNumber;
+let firstNumber = "";
+let secondNumber = "";
 let operator = "";
-
 let justCalculated = false;
+let hasError = false;
+
+const ERROR_MESSAGE = "Undefined";
 
 const display = document.querySelector("#display");
 let displayText = display.textContent;
 
-const btns = document.querySelectorAll('button');
-
+const btns = document.querySelectorAll('.calculator button');
 
 function add(a, b){
     return a+b ;
@@ -23,11 +24,7 @@ function multiply(a, b){
 }
 
 function divide(a, b){
-    if (b!=0)  {
-        return a/b; 
-    } else {
-        return "Undefined"
-    } 
+    return b === 0 ? ERROR_MESSAGE : a / b;
 }
 
 function operate(operator, number1, number2){
@@ -43,146 +40,160 @@ function operate(operator, number1, number2){
     }
 }
 
-function operateAndRound(op, a, b) {
-    const result = operate(op, a, b);
-    // return parseFloat(result.toPrecision(12));
-    return typeof result === "number" ? parseFloat(result.toPrecision(12)) : result;  // round if is number 
+function roundResult(n) {
+    return parseFloat(n.toPrecision(12));
 }
 
 function reset() {
     firstNumber = "";
     secondNumber = "";
     operator = "";
-    displayText=0;
-    updateDisplay(displayText);
+    justCalculated = false;
+    hasError = false;
+    updateDisplay();
 }
 
-function updateDisplay(newDisplay) {
-    display.textContent = newDisplay;
-}
-
-function clicDigit(e, mode) {
-    let value;
-    if (mode == "keydown") { value = e.key;} 
-    else { value = e.target.value;}
-    
-    if (justCalculated)  {
-        if (displayText == "Undefined") reset(); 
-        else firstNumber = String(displayText);
-    }
-    
-    if (value == "+" || value == "-" || value == "*" || value == "/") {
-        if (firstNumber) {
-            if (operator && secondNumber && !justCalculated) {
-                // avoid more than a pair of numbers
-                let rz = operateAndRound(operator, parseFloat(firstNumber), parseFloat(secondNumber));
-                firstNumber = rz;
-                secondNumber = "";
-                displayText = firstNumber;
-            } else if (operator && !secondNumber && !justCalculated) {
-                // not allowed signs
-                displayText = displayText.slice(0, -3); // remove " + "
-            } else if (justCalculated) {
-                secondNumber = "";
-            }
-            operator = value;
-            displayText += ` ${operator} `;
-            updateDisplay(displayText);
-            justCalculated = false;
-        }
-    } else if(value == "=" || value == "Enter") {
-        if (firstNumber && (secondNumber == 0 || secondNumber)) {
-            let n1 = parseFloat(firstNumber); 
-            let n2 = parseFloat(secondNumber);
-            displayText = String(operateAndRound(operator, n1, n2));
-            updateDisplay(displayText); 
-            justCalculated = true;
-        }
-    } else if(value == "delete" || value == "Escape" || value =="C" || value == "c"){
-        reset();
-    } else if(value == "back" || value == "Backspace"){ 
-        if (displayText == "Undefined") { reset(); return; }
-        if (justCalculated) return; // unable delete result
-
-        if (secondNumber) {
-            // del last digit of secondnumber
-            secondNumber = secondNumber.slice(0, -1);
-            displayText = displayText.slice(0, -1);
-        } else if (operator) {
-            // on efface l'opérateur et ses espaces (" + ")
-            operator = "";
-            displayText = displayText.slice(0, -3);
-        } else if (firstNumber) {
-            firstNumber = firstNumber.slice(0, -1);
-            if (firstNumber === "") { reset(); return; }
-            displayText = firstNumber;
-        }
-        updateDisplay(displayText);
-    } else if (!isNaN(value) || value === ".")  {
-        if (justCalculated) reset();
-
-        if(displayText == "0" || displayText == "Undefined" || justCalculated) { 
-            if (value == ".") { 
-                firstNumber += value; 
-                displayText += value; 
-            } else { 
-                firstNumber = value; 
-                displayText = value; 
-            }
-            updateDisplay(displayText);
-            justCalculated = false;
+function updateDisplay() {
+    if (hasError) {
+        display.textContent = ERROR_MESSAGE;
+    } else {
+        if (justCalculated) {
+            display.textContent = `${firstNumber}`;
         } else {
-            if(!operator) { 
-                if (value == "." && firstNumber && firstNumber.includes(".")) return;
-                displayText += value;
-                firstNumber = displayText;
-                updateDisplay(displayText);
-            } else {
-                if (value == "." && secondNumber && secondNumber.includes(".")) return;
-                if (!secondNumber || secondNumber == "") { 
-                    if (value == ".") { 
-                        secondNumber = "0"+value; 
-                        displayText += `0${value}`; 
-                    } else {
-                        secondNumber = value; 
-                        displayText += value; 
-                    }
-                } else { 
-                    if(secondNumber == "0") { 
-                        if (value == ".") {
-                            secondNumber = secondNumber += value;
-                            displayText += value; 
-                        } else {
-                            secondNumber = value; 
-                            displayText = displayText.slice(0, -1) + value;
-                        }
-                    } else {
-                        secondNumber = secondNumber += value;
-                        displayText += value; 
-                    }
-                }
-                // displayText += value; 
-                // secondNumber = (secondNumber || "") + value;
-                updateDisplay(displayText);
-            } 
-            justCalculated = false;
+            const opText = operator ? ` ${operator} ` : "";
+            display.textContent = `${firstNumber}${opText}${secondNumber}` || "0";
         }
     }
 }
 
-btns.forEach(bouton => {
-    bouton.addEventListener("click", (event)=> {
-        clicDigit(event, "clic");
-    });
+// after result or error, digit start a new operation
+function startFreshIfNeeded() {
+    if (hasError || justCalculated) reset();
+}
+
+function inputDigit(digit) {
+    startFreshIfNeeded();
+
+    if (!operator) {
+        firstNumber = firstNumber === "0" ? digit : firstNumber + digit;
+    } else {
+        secondNumber = secondNumber === "0" ? digit : secondNumber + digit;
+    }
+    updateDisplay();
+}
+
+function inputDecimal() {
+    startFreshIfNeeded();
+
+    if (!operator) {
+        if (firstNumber.includes(".")) return;
+        firstNumber = (firstNumber || "0") + ".";
+    } else {
+        if (secondNumber.includes(".")) return;
+        secondNumber = (secondNumber || "0") + ".";
+    }
+    updateDisplay();
+}
+
+function inputOperator(op) {
+    if (hasError) return;
+
+    // no input starting at 0
+    if (firstNumber === "") firstNumber = "0";
+
+    // operator already selected without 2e numb : replace the operator
+    if (operator && secondNumber === "" && !justCalculated) {
+        operator = op;
+        updateDisplay();
+        return;
+    }
+
+    // sequence (12 + 7 - 1) : calcul the intial pair first
+    if (operator && secondNumber !== "" && !justCalculated) {
+        calculate();
+        if (hasError) return;
+    }
+    
+    if (justCalculated) {
+        secondNumber = "";
+    }
+
+    operator = op;
+    justCalculated = false;
+    updateDisplay();
+}
+
+function calculate() {
+    if (firstNumber === "" || operator === "" || secondNumber === "") return;
+
+    const result = operate(
+        operator,
+        parseFloat(firstNumber),
+        parseFloat(secondNumber)
+    );
+
+    if (result === ERROR_MESSAGE) {
+        hasError = true;
+        firstNumber = "";
+        secondNumber = "";
+        operator = "";
+    } else {
+        firstNumber = String(roundResult(result));
+        justCalculated = true;
+    }
+    updateDisplay();
+}
+
+function backspace() {
+    if (hasError) {
+        reset();
+        return;
+    }
+    if (justCalculated) return; // don't cut off a result
+
+    if (secondNumber !== "") {
+        secondNumber = secondNumber.slice(0, -1);
+    } else if (operator) {
+        operator = "";
+    } else {
+        firstNumber = firstNumber.slice(0, -1);
+    }
+    updateDisplay();
+}
+
+function handleInput(value) {
+    if (/^[0-9]$/.test(value)) inputDigit(value);
+    else if (value === ".") inputDecimal();
+    else if (["+", "-", "*", "/"].includes(value)) inputOperator(value);
+    else if (value === "=") calculate();
+    else if (value === "delete") reset();
+    else if (value === "back") backspace();
+}
+
+btns.forEach((button) => {
+    button.addEventListener("click", () => handleInput(button.value));
 });
 
-document.addEventListener('keydown', function(event) {
-    const value = event.key;
-    if (!isNaN(value) || value === "." || value === "+" 
-    || value === "-" || value === "*" || value === "/" 
-    || value === "=" || value === "Enter" || value === "C"  || value === "c" 
-    || value === "Escape" || value === "Backspace" ) {
-        event.preventDefault(); // Prevent default behavior for keys like Enter and Escape
-        clicDigit(event, "keydown");
+const keyMap = {
+    Enter: "=",
+    "=": "=",
+    Escape: "delete",
+    c: "delete",
+    C: "delete",
+    Backspace: "back",
+};
+
+document.addEventListener("keydown", (event) => {
+    const value = keyMap[event.key] ?? event.key;
+    const isHandled =
+        /^[0-9.]$/.test(value) ||
+        ["+", "-", "*", "/", "=", "delete", "back"].includes(value);
+
+    if (isHandled) {
+        // Prevent default behavior for keys like Enter and Escape
+        event.preventDefault();
+        handleInput(value);
     }
 });
+
+updateDisplay();
